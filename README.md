@@ -2,6 +2,27 @@
 
 OpenCode IQ is an independent, local-first plugin for OpenCode V1. It indexes UTF-8 source across languages, tracks change evidence and reports assessed coverage, retention and knowledge debt. JavaScript and TypeScript have AST analysis and bounded behavior challenges. Other languages support file-level text indexing, local walkthroughs and open-ended assessment with a human rubric.
 
+## Quick install
+
+Add the published package URL to the `plugin` array in your project's `opencode.json`. Preserve any entries you already have.
+
+```json
+{
+  "plugin": ["https://github.com/yahiamee/opencode-iq/releases/download/v0.5.0/opencode-iq-0.5.0.tgz"]
+}
+```
+
+Restart OpenCode and run `/iq-help`. OpenCode downloads the package and its dependencies on first use. We verified this path from an empty cache in OpenCode V1 1.19.6 on Windows. To remove the plugin, delete the URL from the array and restart OpenCode.
+
+Project reports stay local by default. To use analysis commands in the OpenCode chat, replace the existing URL entry with the following tuple. This allows bounded report metadata to reach your configured model. Raw source sharing remains a separate opt-in.
+
+```json
+[
+  "https://github.com/yahiamee/opencode-iq/releases/download/v0.5.0/opencode-iq-0.5.0.tgz",
+  { "shareReports": true }
+]
+```
+
 ## Install from a local checkout
 
 Run `npm ci` in the plugin checkout. In your project's `opencode.json`, add the plugin to the existing `plugin` array. Use the absolute file URL of `src/index.js` in your checkout. This example selects Arabic and enables local observations of OpenCode tool edits.

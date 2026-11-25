@@ -8,9 +8,11 @@ import { join, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { test } from "node:test";
 
-const plugin = new URL("../src/index.js", import.meta.url).href;
+const remotePlugin = process.env.OPENCODE_IQ_TEST_PLUGIN;
+const minimal = remotePlugin && process.env.OPENCODE_IQ_TEST_MINIMAL === "1";
+const plugin = remotePlugin || new URL("../src/index.js", import.meta.url).href;
 
-test("OpenCode registers, localizes and unloads the plugin", { timeout: 90_000 }, async (t) => {
+test("OpenCode registers, localizes and unloads the plugin", { timeout: remotePlugin ? 150_000 : 90_000 }, async (t) => {
   const dir = await mkdtemp(join(tmpdir(), "opencode-iq-"));
   const requests = [];
   const provider = createServer(async (request, response) => {
@@ -46,9 +48,14 @@ test("OpenCode registers, localizes and unloads the plugin", { timeout: 90_000 }
       assert.equal(byName.has("iq-scan"), enabled);
       assert.equal(byName.has("iq-dashboard"), enabled);
       if (enabled) {
-        assert.match(byName.get("iq-help").description, /أوامر/);
-        assert.match(byName.get("iq-settings").template, /"locale": "ar"/);
+        assert.match(byName.get("iq-help").description, minimal ? /available OpenCode IQ/ : /أوامر/);
+        assert.match(byName.get("iq-settings").template, minimal ? /"locale": "en"/ : /"locale": "ar"/);
       }
+    }
+    if (minimal) {
+      assert.equal(requests.length, 1);
+      assert.match(JSON.stringify(requests[0].messages), /OpenCode IQ commands/);
+      return;
     }
     assert.equal(requests.length, 6);
     const content = requests[0].messages.filter(({ role }) => role === "user").flatMap(({ content }) => (
@@ -72,7 +79,7 @@ test("OpenCode registers, localizes and unloads the plugin", { timeout: 90_000 }
 
 async function inspectHost(dir, run, enabled, baseURL, t) {
   await writeFile(join(dir, "opencode.json"), JSON.stringify({
-    plugin: enabled ? [[plugin, { locale: "ar", shareReports: true, shareSource: true }]] : [],
+    plugin: enabled ? [minimal ? plugin : [plugin, { locale: "ar", shareReports: true, shareSource: true }]] : [],
     enabled_providers: ["iq-fixture"],
     model: "iq-fixture/fixture",
     provider: {
@@ -81,8 +88,12 @@ async function inspectHost(dir, run, enabled, baseURL, t) {
   }));
   const env = { ...process.env, OPENCODE_DISABLE_AUTOUPDATE: "true", OPENCODE_DISABLE_MODELS_FETCH: "true" };
   env.OPENCODE_IQ_DATA_DIR = join(dir, ".iq-data");
-  env.npm_config_offline = "true";
-  env.npm_config_cache = join(dir, "npm-cache");
+  env.npm_config_offline = remotePlugin && enabled ? "false" : "true";
+  env.npm_config_cache = join(dir, ".npm-cache");
+  if (remotePlugin) {
+    env.npm_config_fetch_retries = "0";
+    env.npm_config_fetch_timeout = "15000";
+  }
   for (const key of ["XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME", "XDG_STATE_HOME"]) {
     env[key] = join(dir, `.run-${run}`, key);
   }
@@ -107,7 +118,7 @@ async function inspectHost(dir, run, enabled, baseURL, t) {
       child.once("error", (error) => { clearTimeout(timer); reject(error); });
       child.once("exit", (code) => { clearTimeout(timer); reject(new Error(`OpenCode exited (${code}): ${logs}`)); });
     });
-    const response = await fetch(`${url}/command`, { signal: AbortSignal.timeout(20_000) });
+    const response = await fetch(`${url}/command`, { signal: AbortSignal.timeout(remotePlugin ? 75_000 : 20_000) });
     assert.equal(response.status, 200, await response.clone().text());
     const commands = await response.json();
     t.diagnostic(`${enabled ? "plugin enabled" : "plugin disabled"}: ${Math.round(performance.now() - start)} ms to command response`);
@@ -118,6 +129,12 @@ async function inspectHost(dir, run, enabled, baseURL, t) {
       const created = await post("/session", { title: "IQ fixture" });
       assert.equal(created.status, 200, await created.clone().text());
       const session = await created.json();
+      if (minimal) {
+        const help = await post(`/session/${session.id}/command`, { command: "iq-help", arguments: "", model: "iq-fixture/fixture" });
+        assert.equal(help.status, 200, await help.clone().text());
+        assert.match(await help.text(), /IQ transport verified/);
+        return commands;
+      }
       const invocation = await post(`/session/${session.id}/command`, { command: "iq-scan", arguments: "", model: "iq-fixture/fixture" });
       assert.equal(invocation.status, 200, await invocation.clone().text());
       assert.match(await invocation.text(), /IQ transport verified/);
