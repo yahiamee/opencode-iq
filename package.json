@@ -1,0 +1,19 @@
+{
+  "name": "opencode-iq",
+  "version": "0.5.0",
+  "description": "Local-first code understanding for OpenCode",
+  "type": "module",
+  "license": "MIT",
+  "bin": { "opencode-iq": "./src/cli.js" },
+  "engines": { "node": ">=22" },
+  "dependencies": { "typescript": "5.9.3" },
+  "exports": {
+    ".": "./src/index.js",
+    "./server": "./src/index.js"
+  },
+  "files": ["src", "docs", "benchmarks", "LICENSE", "SECURITY.md", "CHANGELOG.md", "CONTRIBUTING.md"],
+  "scripts": {
+    "test": "node --test tests/core.test.js tests/workspace.test.js",
+    "test:host": "node --test tests/host.test.js"
+  }
+}

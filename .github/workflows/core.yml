@@ -1,0 +1,39 @@
+name: Core compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: Verify the installable package
+        shell: pwsh
+        run: |
+          $target = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid())
+          New-Item -ItemType Directory -Path $target | Out-Null
+          $packed = npm pack --json --pack-destination $target | ConvertFrom-Json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm install --ignore-scripts --prefix $target (Join-Path $target $packed[0].filename)
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          node (Join-Path $target 'node_modules/opencode-iq/src/cli.js') settings
+      - name: Run real-host probe
+        shell: pwsh
+        run: |
+          $arch = node -p "process.arch"
+          $package = "opencode-windows-$arch"
+          npm install --prefix .local/ci --no-save --ignore-scripts "$package@1.19.6"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $env:OPENCODE_BIN = (Resolve-Path ".local/ci/node_modules/$package/bin/opencode.exe").Path
+          npm run test:host
