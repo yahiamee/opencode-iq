@@ -1,5 +1,9 @@
 # OpenCode IQ
 
+**Developed by [YAHIA](https://github.com/yahiamee).**
+
+**Public preview** · MIT license · Verified on Windows with OpenCode V1 1.19.6
+
 OpenCode IQ is an independent, local-first plugin for OpenCode V1. It indexes UTF-8 source across languages, tracks change evidence and reports assessed coverage, retention and knowledge debt. JavaScript and TypeScript have AST analysis and bounded behavior challenges. Other languages support file-level text indexing, local walkthroughs and open-ended assessment with a human rubric.
 
 ## Quick install
@@ -14,6 +18,20 @@ Add the published package URL to the `plugin` array in your project's `opencode.
 
 Restart OpenCode and run `/iq-help`. OpenCode downloads the package and its dependencies on first use. We verified this path from an empty cache in OpenCode V1 1.19.6 on Windows. To remove the plugin, delete the URL from the array and restart OpenCode.
 
+## Start here
+
+| Want to | Start with |
+| --- | --- |
+| Confirm installation | `/iq-help` in OpenCode |
+| Understand a file | `opencode-iq explain --lines <path>` locally |
+| Check your understanding | `opencode-iq quiz <path-or-function-id>` or `opencode-iq quiz-open <path-or-function-id>` |
+| Review coverage | `opencode-iq dashboard` or `opencode-iq report html` |
+| Report a problem | [GitHub Issues](https://github.com/yahiamee/opencode-iq/issues) |
+
+The `opencode-iq` CLI is available separately from the plugin entry. Run it from a local checkout as `node <plugin-checkout>/src/cli.js`, or install the release package with a Node package manager.
+
+## OpenCode chat and privacy
+
 Project reports stay local by default. To use analysis commands in the OpenCode chat, replace the existing URL entry with the following tuple. This allows bounded report metadata to reach your configured model. Raw source sharing remains a separate opt-in.
 
 ```json
@@ -25,7 +43,7 @@ Project reports stay local by default. To use analysis commands in the OpenCode 
 
 ## Install from a local checkout
 
-Run `npm ci` in the plugin checkout. In your project's `opencode.json`, add the plugin to the existing `plugin` array. Use the absolute file URL of `src/index.js` in your checkout. This example selects Arabic and enables local observations of OpenCode tool edits.
+Run `npm ci` in the plugin checkout. In your project's `opencode.json`, add the plugin to the existing `plugin` array. Replace the example file URL with the absolute URL of `src/index.js` in your checkout. This example selects Arabic and enables local observations of OpenCode tool edits.
 
 ```json
 {
@@ -92,3 +110,5 @@ Use Node.js 22 or later. Run `npm test` for the local suite. Run `npm run test:h
 [Phase 1 report and verification results](docs/phase-1.md)
 
 [Current implementation and remaining scope](docs/implementation-status.md)
+
+[Releases](https://github.com/yahiamee/opencode-iq/releases) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [MIT license](LICENSE)
