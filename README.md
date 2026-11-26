@@ -34,7 +34,7 @@ Restart OpenCode and run `/iq-help`. OpenCode downloads the package and its depe
 
 The `opencode-iq` CLI is available separately from the plugin entry. Run it from a local checkout as `node <plugin-checkout>/src/cli.js`, or install the release package with a Node package manager.
 
-## OpenCode chat and privacy
+## Enable analysis commands in OpenCode chat
 
 Project reports stay local by default. To use analysis commands in the OpenCode chat, replace the existing URL entry with the following tuple. This allows bounded report metadata to reach your configured model. Raw source sharing remains a separate opt-in.
 
@@ -58,7 +58,7 @@ Run `npm ci` in the plugin checkout. In your project's `opencode.json`, add the 
 
 Restart OpenCode and enter `/iq-help` or `/iq-settings`. Existing project commands take precedence. To update a local installation, replace the checkout with the desired version, run `npm ci`, and restart. To remove the plugin, delete its entry and restart. Use the local `clear confirm` command to delete its data.
 
-## Work with a project
+## Local CLI
 
 From the project directory, run the package's `opencode-iq` binary or invoke `node <plugin-checkout>/src/cli.js`. The local CLI handles reports and assessments without a model account.
 
@@ -93,13 +93,19 @@ In a clean checkout, set `OPENCODE_IQ_GITHUB_TOKEN` to an installation token fro
 
 A manifest contains `image`, `filename`, and `cases`. Each case has an `input` and an `expected` JSON value. To generate expected values from a known-good source file, put just `input` values in the cases and run `opencode-iq challenge-build <inputs.json> <reference> > challenge.json`, then use that challenge for grading. The runner mounts only the selected source file, disables networking and bounds CPU, memory, output, processes and time. It requires the local Docker daemon and a digest-pinned image without Dockerfile volumes. Challenge results are separate from mastery evidence.
 
+### Coverage reports
+
 The HTML coverage report includes file and status filters and expandable units with their source ranges. It opens locally in a browser and makes no network requests.
+
+## Model access and privacy
 
 OpenCode slash commands render through the selected model. By default the plugin directs reports to the CLI. Set `shareReports: true` only if you want OpenCode to pass bounded result data, such as symbol names and assessment records, to its selected model. `trackToolChanges` is a separate local setting. With it enabled, `teaching` can be `silent`, `smart` or `intensive`. The latter two batch eligible edit counts into a terminal notice at session idle.
 
 To have the model explain source in any indexed language, set both `shareReports: true` and `shareSource: true` in the plugin options, then explicitly invoke `/iq-explain --model src/main.rs:10-30`. OpenCode receives only the requested excerpt, capped at 100 lines and 12,000 serialized characters, along with file and language metadata. The selected model receives that excerpt through OpenCode; review the selected lines before using this command. With source sharing disabled, use `opencode-iq explain --lines src/main.rs` for a local view.
 
 With the same opt-in, run `/iq-assess src/main.rs:10-30` and then `/iq-assess-submit <id> <answer>`. Generation and grading use separate tool-restricted OpenCode scratch sessions. Set `assessmentModel` to `provider/model` to override OpenCode's default model for those sessions. Automatic OpenCode session sharing must be disabled for these commands. IQ verifies rubric scores and source citation bounds before persisting model feedback. The local `profile` command shows exact saved scores. Advisory model feedback does not grant mastery or pass the ownership gate.
+
+## How coverage is measured
 
 AST line totals count lines with parser tokens once under the narrowest covering unit. Text-mode totals count nonblank lines, including comments. Reports distinguish the two modes. Language labels are inferred from extensions or a script header. Unknown extensions and extensionless UTF-8 files can be indexed unless an exclusion applies. Hidden paths, common generated paths, documentation, standard data formats and binary content are excluded. Text-mode dependency graphs and syntax diagnostics are unavailable.
 
