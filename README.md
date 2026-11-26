@@ -121,4 +121,8 @@ Use Node.js 22 or later. Run `npm test` for the local suite. Run `npm run test:h
 
 [Current implementation and remaining scope](docs/implementation-status.md)
 
-[Releases](https://github.com/yahiamee/opencode-iq/releases) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [MIT license](LICENSE)
+## License and attribution
+
+OpenCode IQ is licensed under [MIT](LICENSE). Anyone may use, modify, and redistribute it, including commercially, provided that all copies or substantial portions retain the copyright notice for YAHIA and OpenCode IQ contributors and the MIT permission notice.
+
+[Releases](https://github.com/yahiamee/opencode-iq/releases) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
