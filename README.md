@@ -4,7 +4,11 @@
 
 **Public preview** · MIT license · Verified on Windows with OpenCode V1 1.19.6
 
+[العربية](README.ar.md) · [Quick install](#quick-install) · [Release notes](https://github.com/yahiamee/opencode-iq/releases/tag/v0.5.0)
+
 OpenCode IQ is an independent, local-first plugin for OpenCode V1. It indexes UTF-8 source across languages, tracks change evidence and reports assessed coverage, retention and knowledge debt. JavaScript and TypeScript have AST analysis and bounded behavior challenges. Other languages support file-level text indexing, local walkthroughs and open-ended assessment with a human rubric.
+
+OpenCode IQ is a community project with no affiliation to the OpenCode team.
 
 ## Quick install
 
